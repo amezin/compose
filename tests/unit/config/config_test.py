@@ -17,6 +17,7 @@ import yaml
 from ...helpers import build_config_details
 from compose.config import config
 from compose.config import types
+from compose.config.config import ConfigFile
 from compose.config.config import resolve_build_args
 from compose.config.config import resolve_environment
 from compose.config.environment import Environment
@@ -4660,6 +4661,11 @@ class ExtendsTest(unittest.TestCase):
         for svc in services:
             assert types.SecurityOpt.parse('apparmor:unconfined') in svc['security_opt']
             assert types.SecurityOpt.parse('seccomp:unconfined') in svc['security_opt']
+
+    @mock.patch.object(ConfigFile, 'from_filename', wraps=ConfigFile.from_filename)
+    def test_extends_same_file_optimization(self, from_filename_mock):
+        load_from_filename('tests/fixtures/extends/no-file-specified.yml')
+        from_filename_mock.assert_called_once()
 
 
 @pytest.mark.xfail(IS_WINDOWS_PLATFORM, reason='paths use slash')
